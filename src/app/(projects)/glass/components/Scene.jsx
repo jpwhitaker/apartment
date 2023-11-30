@@ -1,50 +1,51 @@
 "use client";
+import { useRef, useEffect } from "react";
+import { Mask, OrbitControls, useMask, Environment, useEnvironment, Plane } from "@react-three/drei";
+import OpenBox from './OpenBox'
+import { useControls } from 'leva'
 
-import { Mask, useMask } from "@react-three/drei";
-import Lights from './Lights'
-import  OpenBox  from './OpenBox'
+import { MeshPhysicalMaterial } from "three";
+
+import { Couch } from "./Couch";
 
 export default function Scene() {
+  const rgbeTexture = useEnvironment({ files: './modern_buildings_night_1k.hdr' })
+  const { color } = useControls({
+    color: { h: 32, s: 35, l: 78 }
+  });
   const stencil = useMask(1, true)
+
+  useEffect(() => {
+    console.log('Color changed:', color);
+    // If you want to log it in HSL format:
+    console.log(`hsl(${color.h}, ${color.s}%, ${color.l}%)`);
+  }, [color]);
+
   return (
     <>
-      <Lights />
+      <OrbitControls />
 
 
-      {/* Mask should punch holes on this mesh */}
-      <mesh position={[0, 0, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial color="red" {...stencil} />
+      {/*glass*/}
+      <mesh position={[0, 0, 0.751]} onCreated={({ object }) => object.layers.set(1)}>
+        <planeGeometry args={[3, 3]} />
+        <meshPhysicalMaterial color="white" transmission={1} thickness={0} roughness={0.17} envMap={rgbeTexture} envMapIntensity={0.2} />
       </mesh>
-      <MaskRow />
+
+      {/*apartment*/}
+      <OpenBox x={0} y={0} i={1} temp={`hsl(${color.h}, ${color.s}%, ${color.l}%)`} />
+      <Couch position={[1, -1.5, -0.50]} rotation={[0, -Math.PI / 2, 0]} />
+
+
+
+      {/* <Plane args={[1, 1]} position={[0, 0, 2.01]}>
+        <meshBasicMaterial color={"blue"} />
+      </Plane> */}
     </>
   )
 }
 
-const MaskRow = () => {
 
-  const cols = 5
-  const rows = 5
-  const masks = []
-  const gap = 0.2;
-  const totalWidth = rows + (rows - 1) * gap;
-
-  const startX = -totalWidth / 2 + 0.5;
-  //rows
-  for (var i = 0; i < rows; i++) {
-    const x = startX + i + (i * gap);
-    const y = 0;
-    masks.push(
-      <>
-
-        <OpenBox x={x} y={0} i={i} temp={getRandomLightColor()}/>
-      </>
-    )
-  }
-  return (
-    masks
-  )
-}
 
 function getRandomLightColor() {
   // Define the hue range for cooler to warmer tones

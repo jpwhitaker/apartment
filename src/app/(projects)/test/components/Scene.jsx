@@ -1,50 +1,50 @@
 "use client";
-
-import { Mask, useMask } from "@react-three/drei";
+import { useRef, useEffect } from "react";
+import { Mask, OrbitControls, useMask, Environment } from "@react-three/drei";
 import Lights from './Lights'
-import  OpenBox  from './OpenBox'
+import OpenBox from './OpenBox'
+
 
 export default function Scene() {
   const stencil = useMask(1, true)
+  const envRef = useRef();
+
+
+  useEffect(() => {
+    // Assuming you want to put the spotlight on layer 1
+
+    if (envRef.current !== undefined) {
+      debugger
+      envRef.current.layers.set(1);
+    }
+
+
+  }, []);
+
+
   return (
     <>
-      <Lights />
-
-
+      {/* <Lights /> */}
+      {/* <mesh  position={[0, 0, 0]}>
+        <planeGeometry args={[1, 1]} />
+        <meshPhysicalMaterial color="white" transmission={0.4} roughness={0.2}   />
+      </mesh> */}
+      <OrbitControls />
       {/* Mask should punch holes on this mesh */}
-      <mesh position={[0, 0, 0]}>
+      {/* <mesh position={[0, 0, 0]}>
         <planeGeometry args={[10, 10]} />
         <meshStandardMaterial color="red" {...stencil} />
-      </mesh>
-      <MaskRow />
+      </mesh> */}
+      <group ref={envRef}>
+        {/* <Environment background={false} files={'/modern_buildings_night_1k.hdr'} blur={0.8} /> */}
+      </group>
+      <OpenBox x={0} y={0} i={1} temp={getRandomLightColor()} />
+
     </>
   )
 }
 
-const MaskRow = () => {
 
-  const cols = 5
-  const rows = 5
-  const masks = []
-  const gap = 0.2;
-  const totalWidth = rows + (rows - 1) * gap;
-
-  const startX = -totalWidth / 2 + 0.5;
-  //rows
-  for (var i = 0; i < rows; i++) {
-    const x = startX + i + (i * gap);
-    const y = 0;
-    masks.push(
-      <>
-
-        <OpenBox x={x} y={0} i={i} temp={getRandomLightColor()}/>
-      </>
-    )
-  }
-  return (
-    masks
-  )
-}
 
 function getRandomLightColor() {
   // Define the hue range for cooler to warmer tones
